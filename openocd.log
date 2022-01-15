@@ -1,0 +1,50 @@
+Info : Unable to match requested speed 1000 kHz, using 950 kHz
+Info : Unable to match requested speed 1000 kHz, using 950 kHz
+Info : clock speed 950 kHz
+Info : STLINK v2 JTAG v32 API v2 SWIM v7 VID 0x0483 PID 0x3748
+Info : using stlink api v2
+Info : Target voltage: 4.318104
+Info : stm32f1x.cpu: hardware has 6 breakpoints, 4 watchpoints
+Info : accepting 'gdb' connection from pipe
+Info : device id = 0x20036410
+Info : flash size = 64kbytes
+undefined debug reason 7 - target needs reset
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004618 msp: 0x20005000
+target halted due to breakpoint, current mode: Thread 
+xPSR: 0x61000000 pc: 0x2000003a msp: 0x20005000
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004618 msp: 0x20005000
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004618 msp: 0x20005000
+Info : halted: PC: 0x08003146
+Info : halted: PC: 0x08003148
+Info : halted: PC: 0x080028e8
+Info : halted: PC: 0x0800314e
+Info : halted: PC: 0x08003150
+Info : halted: PC: 0x08003152
+Info : halted: PC: 0x08003154
+Info : halted: PC: 0x08003156
+Info : halted: PC: 0x0800332c
+Info : halted: PC: 0x0800315a
+Info : halted: PC: 0x0800315c
+Info : halted: PC: 0x0800315e
+Info : halted: PC: 0x08002658
+Info : halted: PC: 0x08003166
+Info : halted: PC: 0x08003168
+Info : halted: PC: 0x0800316a
+Info : halted: PC: 0x0800316c
+Info : halted: PC: 0x08003186
+Info : halted: PC: 0x08003188
+Info : halted: PC: 0x0800318a
+Info : halted: PC: 0x08003194
+Info : halted: PC: 0x08003196
+Info : halted: PC: 0x08003198
+Info : halted: PC: 0x0800319a
+Info : halted: PC: 0x0800319c
+Info : halted: PC: 0x0800319e
+Info : halted: PC: 0x08004838
+Info : halted: PC: 0x080031a4
+Info : halted: PC: 0x080031a6
+Info : halted: PC: 0x080031a8
+Info : dropped 'gdb' connection
