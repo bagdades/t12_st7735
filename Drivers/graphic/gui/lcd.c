@@ -17,6 +17,7 @@
  */
 
 #include <stdlib.h>
+#include "fonts.h"
 #include "lcd.h"
 #include "st7735.h"
 

@@ -69,13 +69,13 @@ static int saveTip(widget_t *w) {
 	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
 		strcpy(systemSettings.ironTips[systemSettings.currentNumberOfTips].name, str);
 		++systemSettings.currentNumberOfTips;
-		/* saveSettings(); */
+		saveSettings();
 	}
 	else {
 		for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++ x) {
 			if(strcmp(tipCombo->comboBoxWidget.currentItem->text, systemSettings.ironTips[x].name) == 0) {
 				strcpy(systemSettings.ironTips[x].name, str);
-				/* saveSettings(); */
+				saveSettings();
 				break;
 			}
 		}
@@ -97,7 +97,7 @@ static int delTip(widget_t *w) {
 		systemSettings.ironTips[x] = systemSettings.ironTips[x + 1];
 	}
 	--systemSettings.currentNumberOfTips;
-	/* saveSettings(); */
+	saveSettings();
 	return screen_edit_iron_tips;
 }
 ////
@@ -130,8 +130,8 @@ static void setContrast_(uint16_t *val) {
 	/* setContrast(CONTRAST); */
 }
 static int saveContrast(widget_t *w) {
-	/* systemSettings.contrast = CONTRAST; */
-	/* saveSettings(); */
+	systemSettings.contrast = CONTRAST;
+	saveSettings();
 	return screen_settings;
 }
 static int cancelContrast(widget_t *w) {
@@ -140,56 +140,56 @@ static int cancelContrast(widget_t *w) {
 }
 ////
 static void * getBoostTime() {
-	/* BTIME = currentBoostSettings.time; */
+	BTIME = currentBoostSettings.time;
 	return &BTIME;
 }
 static void setBoostTime(uint16_t *val) {
 	BTIME = *val;
-	/* currentBoostSettings.time = BTIME; */
-	//applyBoostSettings();
+	currentBoostSettings.time = BTIME;
+	/* applyBoostSettings(); */
 }
 static void * getBoostTemp() {
-	/* BTEMP = currentBoostSettings.temperature; */
+	BTEMP = currentBoostSettings.temperature;
 	return &BTEMP;
 }
 static void setBoostTemp(uint16_t *val) {
 	BTEMP = *val;
-	/* currentBoostSettings.temperature = BTEMP; */
+	currentBoostSettings.temperature = BTEMP;
 }
 static int saveBoost(widget_t *w) {
-	/* systemSettings.boost = currentBoostSettings; */
-	/* saveSettings(); */
+	systemSettings.boost = currentBoostSettings;
+	saveSettings();
 	return screen_settings;
 }
 static int cancelBoost(widget_t *w) {
-	/* currentBoostSettings = systemSettings.boost; */
+	currentBoostSettings = systemSettings.boost;
 	return screen_settings;
 }
 ////
 static int saveSleep(widget_t *w) {
-	/* systemSettings.sleep = currentSleepSettings; */
-	/* saveSettings(); */
+	systemSettings.sleep = currentSleepSettings;
+	saveSettings();
 	return screen_settings;
 }
 static int cancelSleep(widget_t *w) {
-	/* currentSleepSettings = systemSettings.sleep; */
+	currentSleepSettings = systemSettings.sleep;
 	return screen_settings;
 }
 static void setSleepTime(uint16_t *val) {
 	SLEEPTIME = *val;
-	/* currentSleepSettings.sleepTime = SLEEPTIME; */
+	currentSleepSettings.sleepTime = SLEEPTIME;
 }
 
 static void * getSleepTime() {
-	/* SLEEPTIME = currentSleepSettings.sleepTime; */
+	SLEEPTIME = currentSleepSettings.sleepTime;
 	return &SLEEPTIME;
 }
 static void setStandByTime(uint16_t *val) {
 	STANDBYTIME = *val;
-	/* currentSleepSettings.standbyTime = STANDBYTIME; */
+	currentSleepSettings.standbyTime = STANDBYTIME;
 }
 static void * getStandByTime() {
-	/* STANDBYTIME = currentSleepSettings.standbyTime; */
+	STANDBYTIME = currentSleepSettings.standbyTime;
 	return &STANDBYTIME;
 }
 static void setSleepTemp(uint16_t *val) {

@@ -67,8 +67,18 @@ extern struct mallinfo mi;
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+// stm32cube ide removed line printing in error handler. this macro restores it.
+// Credits: https://community.st.com/s/question/0D50X00009XkffVSAR/stm32cubemx-v421-errorhandler-definition-issues-in-mainh
+#ifdef DEBUG_ERROR
+	#define GET_MACRO( _0, _1, NAME, ... ) NAME
+	#define Error_Handler(...) GET_MACRO( _0, ##__VA_ARGS__, Error_Handler1, Error_Handler0 )()
+	#define Error_Handler0() _Error_Handler(__BASE_FILE__, __LINE__ )
+	#define Error_Handler1(unused) _Error_Handler( char * file, int line )
+	void _Error_Handler(char *, int);
+#endif
 /* USER CODE END EM */
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -99,6 +109,20 @@ extern uint32_t max_allocated;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define WAKE_Pin GPIO_PIN_0
+#define WAKE_GPIO_Port GPIOA
+#define BUZ0_Pin GPIO_PIN_1
+#define BUZ0_GPIO_Port GPIOA
+#define BUZ1_Pin GPIO_PIN_2
+#define BUZ1_GPIO_Port GPIOA
+#define NTC_Pin GPIO_PIN_5
+#define NTC_GPIO_Port GPIOA
+#define PWM_Pin GPIO_PIN_6
+#define PWM_GPIO_Port GPIOA
+#define VIN_Pin GPIO_PIN_0
+#define VIN_GPIO_Port GPIOB
+#define TIP_Pin GPIO_PIN_1
+#define TIP_GPIO_Port GPIOB
 #define LCD_SCL_Pin GPIO_PIN_13
 #define LCD_SCL_GPIO_Port GPIOB
 #define LCD_CS_Pin GPIO_PIN_14

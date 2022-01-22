@@ -197,18 +197,45 @@ static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef* font, uin
 
     ST7735_SetAddressWindow(x, y, x+font->width-1, y+font->height-1);
 
-    for(i = 0; i < font->height; i++) {
-        b = font->data[(ch - 32) * font->height + i];
-        for(j = 0; j < font->width; j++) {
-            if((b << j) & 0x8000)  {
-                uint8_t data[] = { color >> 8, color & 0xFF };
-                ST7735_WriteData(data, sizeof(data));
-            } else {
-                uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
-                ST7735_WriteData(data, sizeof(data));
+    if(font->width > 16) {
+        for(i = 0; i < font->height * 2; i++) {
+            b = font->data[(ch - 32) * 70 + i];
+            for(j = 0; j < 16; j++) {
+                if((b << j) & 0x8000)  {
+                    uint8_t data[] = { color >> 8, color & 0xFF };
+                    ST7735_WriteData(data, sizeof(data));
+                } else {
+                    uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+                    ST7735_WriteData(data, sizeof(data));
+                }
+            }
+            i++;
+            b = font->data[(ch - 32) * 70 + i];
+            for(j = 0; j < 10; j++) {
+                if((b << j) & 0x8000)  {
+                    uint8_t data[] = { color >> 8, color & 0xFF };
+                    ST7735_WriteData(data, sizeof(data));
+                } else {
+                    uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+                    ST7735_WriteData(data, sizeof(data));
+                }
             }
         }
     }
+        else {
+            for(i = 0; i < font->height; i++) {
+                b = font->data[(ch - 32) * font->height + i];
+                for(j = 0; j < font->width; j++) {
+                    if((b << j) & 0x8000)  {
+                        uint8_t data[] = { color >> 8, color & 0xFF };
+                        ST7735_WriteData(data, sizeof(data));
+                    } else {
+                        uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+                        ST7735_WriteData(data, sizeof(data));
+                    }
+                }
+            }
+        }
 }
 
 /*

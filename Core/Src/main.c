@@ -26,6 +26,7 @@
 #include "rotary_encoder.h"
 #include "st7735.h"
 #include "stm32f1xx_hal.h"
+#include "settings.h"
 /* #include "ucg_com_stm32_hal.h" */
 /* USER CODE END Includes */
 
@@ -44,10 +45,14 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi2;
 
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
@@ -60,7 +65,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_DMA_Init(void);
+static void MX_ADC1_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -73,16 +81,16 @@ uint32_t max_allocated;
 #endif
 // Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
 void malloc_fragmentation_fix(void){
-  uint32_t *ptr = NULL;
-  uint32_t try=17408;
-  while(!ptr && try){
-    ptr = _malloc(try);
-    try-=16;
-  }
-  _free(ptr);
-  #ifdef DEBUG_ALLOC
-  max_allocated=0; //Clear max allocated result
-  #endif
+	uint32_t *ptr = NULL;
+	uint32_t try=17408;
+	while(!ptr && try){
+		ptr = _malloc(try);
+		try-=16;
+	}
+	_free(ptr);
+#ifdef DEBUG_ALLOC
+	max_allocated=0; //Clear max allocated result
+#endif
 }
 
 void Init(void) {
@@ -126,15 +134,23 @@ int main(void)
 	MX_GPIO_Init();
 	MX_RTC_Init();
 	MX_SPI2_Init();
+	MX_DMA_Init();
+	MX_ADC1_Init();
 	MX_TIM4_Init();
+	MX_TIM3_Init();
 	/* USER CODE BEGIN 2 */
+	restoreSettings();
 	Init();
 	/* RE_Rotation_t restate; */
 	uint32_t lastTimeDisplay = HAL_GetTick();
 	ucg_SetBackColor(&ucg, C_BLACK);
 	ucg_FillScreen(&ucg);
 	ucg_SetForeColor(&ucg, C_RED);
-	ucg_SetFont(&ucg, &Font_16x26);
+	currentBoostSettings = systemSettings.boost;
+	currentSleepSettings = systemSettings.sleep;
+	/* applyBoostSettings(); */
+	/* applySleepSettings(); */
+	/* setCurrentTip(systemSettings.currentTip);ucg_SetFont(&ucg, &Font_16x26); */
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -190,12 +206,74 @@ void SystemClock_Config(void)
 	{
 		Error_Handler();
 	}
-	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
 	PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+	PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
 	{
 		Error_Handler();
 	}
+}
+
+/**
+ * @brief ADC1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_ADC1_Init(void)
+{
+
+	/* USER CODE BEGIN ADC1_Init 0 */
+
+	/* USER CODE END ADC1_Init 0 */
+
+	ADC_ChannelConfTypeDef sConfig = {0};
+
+	/* USER CODE BEGIN ADC1_Init 1 */
+
+	/* USER CODE END ADC1_Init 1 */
+	/** Common config
+	*/
+	hadc1.Instance = ADC1;
+	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc1.Init.ContinuousConvMode = ENABLE;
+	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc1.Init.NbrOfConversion = 3;
+	if (HAL_ADC_Init(&hadc1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/** Configure Regular Channel
+	*/
+	sConfig.Channel = ADC_CHANNEL_5;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/** Configure Regular Channel
+	*/
+	sConfig.Channel = ADC_CHANNEL_8;
+	sConfig.Rank = ADC_REGULAR_RANK_2;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/** Configure Regular Channel
+	*/
+	sConfig.Channel = ADC_CHANNEL_9;
+	sConfig.Rank = ADC_REGULAR_RANK_3;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/* USER CODE BEGIN ADC1_Init 2 */
+
+	/* USER CODE END ADC1_Init 2 */
+
 }
 
 /**
@@ -294,6 +372,66 @@ static void MX_SPI2_Init(void)
 }
 
 /**
+ * @brief TIM3 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM3_Init(void)
+{
+
+	/* USER CODE BEGIN TIM3_Init 0 */
+
+	/* USER CODE END TIM3_Init 0 */
+
+	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_OC_InitTypeDef sConfigOC = {0};
+
+	/* USER CODE BEGIN TIM3_Init 1 */
+
+	/* USER CODE END TIM3_Init 1 */
+	htim3.Instance = TIM3;
+	htim3.Init.Prescaler = 359;
+	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim3.Init.Period = 65535;
+	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 0;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	__HAL_TIM_DISABLE_OCxPRELOAD(&htim3, TIM_CHANNEL_1);
+	/* USER CODE BEGIN TIM3_Init 2 */
+
+	/* USER CODE END TIM3_Init 2 */
+	HAL_TIM_MspPostInit(&htim3);
+
+}
+
+/**
  * @brief TIM4 Initialization Function
  * @param None
  * @retval None
@@ -339,6 +477,22 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void)
+{
+
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA1_CLK_ENABLE();
+
+	/* DMA interrupt init */
+	/* DMA1_Channel1_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+}
+
+/**
  * @brief GPIO Initialization Function
  * @param None
  * @retval None
@@ -349,14 +503,27 @@ static void MX_GPIO_Init(void)
 
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOA, BUZ0_Pin|BUZ1_Pin|LCD_RST_Pin|LCD_DC_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA, LCD_RST_Pin|LCD_DC_Pin, GPIO_PIN_RESET);
+	/*Configure GPIO pins : WAKE_Pin ENC_SW_Pin */
+	GPIO_InitStruct.Pin = WAKE_Pin|ENC_SW_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : BUZ0_Pin BUZ1_Pin */
+	GPIO_InitStruct.Pin = BUZ0_Pin|BUZ1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : LCD_CS_Pin */
 	GPIO_InitStruct.Pin = LCD_CS_Pin;
@@ -371,12 +538,6 @@ static void MX_GPIO_Init(void)
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : ENC_SW_Pin */
-	GPIO_InitStruct.Pin = ENC_SW_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(ENC_SW_GPIO_Port, &GPIO_InitStruct);
 
 	/*Configure GPIO pins : ENC_L_Pin ENC_R_Pin */
 	GPIO_InitStruct.Pin = ENC_L_Pin|ENC_R_Pin;
@@ -405,6 +566,39 @@ void Program_Handler(void) {
 void Error_Handler(void)
 {
 	/* USER CODE BEGIN Error_Handler_Debug */
+	ucg_SetBackColor(&ucg, C_BLACK);
+	ucg_FillScreen(&ucg);
+	ucg_SetFont(&ucg, &Font_11x18);
+	ucg_SetForeColor(&ucg, C_RED);
+	char strOut[16];
+	uint8_t outPos=0;
+	uint8_t inPos=0;
+	uint8_t ypos=16;
+
+	sprintf(strOut,"Line %u",line);
+	ucg_WriteString(&ucg, 0, 0, strOut);
+
+	while(1){                                                  // Divide string in chuncks that fit teh screen width
+		strOut[outPos] = file[inPos];                            // Copy char
+		strOut[outPos+1] = 0;                                    // Set out string null terminator
+		uint8_t currentWidth = ucg_GetStrWidth(&ucg, &Font_11x18, strOut);  // Get width
+		if(currentWidth < ucg_GetXDim(&ucg)){                              // If less than oled width, increase input string pos
+			inPos++;
+		}
+		if( (currentWidth > ucg_GetXDim(&ucg)) || (strOut[outPos]==0) ){  // If width bigger than oled width or current char null(We reached end of input string)
+			char current = strOut[outPos];                        // Store current char
+			strOut[outPos]=0;                                     // Set current out char to null
+			ucg_WriteString(&ucg, 0, ypos, strOut);                 // Draw string
+			if(current==0){                                       // If current is null, we reached end
+				break;                                              // Break
+			}
+			outPos=0;                                             // Else, reset output position
+			ypos += 18;                                           // Increase Y position and continue copying the input string
+		}
+		else{
+			outPos++;                                              // Output buffer not filled yet, increase position
+		}
+	};
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1)

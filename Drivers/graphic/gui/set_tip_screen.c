@@ -17,20 +17,24 @@
  */
 
 #include "set_tip_screen.h"
+#include "settings.h"
 
 extern ucg_t ucg;
 uint16_t m_tip= 0;
-static char *tipstr[3];
+/* static char *tipstr[3]; */
+static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])];
 static multi_option_widget_t *tipsWidget = NULL;
 
 static void *gTip() {
-  /* m_temp = getSetTemperature(); */
-  return &m_tip;
+	m_tip = systemSettings.currentTip;
+	return &m_tip;
 }
 
 void sTip(uint16_t *value) {
-  m_tip = *value;
-  /* setSetTemperature(m_temp); */
+	m_tip = *value;
+	systemSettings.currentTip = m_tip;
+	saveSettings();
+	/* setCurrentTip(m_tip); */
 }
 
 static int set_tip_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -39,33 +43,37 @@ static int set_tip_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 	return default_screenProcessInput(scr, input, state);
 }
 
-static int tipProcessInput(widget_t *w, RE_Rotation_t r, RE_State_t *s) {
-  if (r == Click)
-    return screen_main;
-  switch (w->editable.selectable.state) {
-  case widget_selected:
-    /* if(r == Click && getCurrentMode() != mode_set) */
-    /* 	setCurrentMode(mode_set); */
-    break;
-  case widget_edit:
-    /* if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set)
-     * { */
-    /* 	setCurrentMode(mode_set); */
-    /* 	return -1; */
-    /* } */
-    break;
-  default:
-    break;
-  }
-  return default_widgetProcessInput(w, r, s);
-}
+/* static int tipProcessInput(widget_t *w, RE_Rotation_t r, RE_State_t *s) { */
+/*   if (r == Click) */
+/*     return screen_main; */
+/*   switch (w->editable.selectable.state) { */
+/* 	  case widget_selected: */
+/* 		  if(r == Click && getCurrentMode() != mode_set) */
+/* 			  #<{(| setCurrentMode(mode_set); |)}># */
+/* 		  break; */
+/* 	  case widget_edit: */
+/* 		  #<{(| if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set) |)}># */
+/* 		  if(r != Rotate_Nothing && r != LongClick) */
+/* 		  {  */
+/* 			  #<{(| setCurrentMode(mode_set); |)}># */
+/* 			  return -1; */
+/* 		  } */
+/* 		  break; */
+/* 	  default: */
+/* 		  break; */
+/*   } */
+/*   return default_widgetProcessInput(w, r, s); */
+/* } */
 
 void set_tip_screen_setup(screen_t *scr) {
 	uint8_t hcenter = ucg_GetXDim(&ucg) / 2;
 	uint8_t swidth;
-	tipstr[0] = "K";
-	tipstr[1] = "BL";
-	tipstr[2] = "KU";
+	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
+		tipstr[x] = systemSettings.ironTips[x].name;
+	}
+	/* tipstr[0] = "K"; */
+	/* tipstr[1] = "BL"; */
+	/* tipstr[2] = "KU"; */
 	scr->draw = &default_screenDraw;
 	scr->processInput = &set_tip_processInput;
 	scr->init = &default_init;
@@ -89,7 +97,7 @@ void set_tip_screen_setup(screen_t *scr) {
 	widget->posY = 35;
 	widget->font = &Font_16x26;
 	widget->fcolor = C_CYAN;
-	widget->multiOptionWidget.editable.selectable.processInput = (int (*)(widget_t *, RE_Rotation_t, RE_State_t *)) &tipProcessInput;
+	/* widget->multiOptionWidget.editable.selectable.processInput = (int (*)(widget_t *, RE_Rotation_t, RE_State_t *)) &tipProcessInput; */
 	widget->multiOptionWidget.editable.inputData.getData = &gTip;
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
@@ -102,8 +110,8 @@ void set_tip_screen_setup(screen_t *scr) {
 	widget->reservedChars = 3;
 
 	widget->multiOptionWidget.options = tipstr;
-	widget->multiOptionWidget.numberOfOptions = 3;
-	/* widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips; */
+	/* widget->multiOptionWidget.numberOfOptions = 3; */
+	widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
 	tipsWidget = &widget->multiOptionWidget;
 	widget->multiOptionWidget.currentOption = 0;
 	widget->multiOptionWidget.defaultOption = 0;

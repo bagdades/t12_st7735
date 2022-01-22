@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "stm32f1xx_hal.h"
 #include "widgets.h"
+#include "settings.h"
 
 
 #define NO_IRON_ADC 5000
@@ -31,8 +32,8 @@ extern uint16_t m_tip;
 static uint16_t m_mode = 0;
 extern uint16_t m_temp;
 static char *modestr[] = {"STB:", "BOO:", "SLP:", "SET:"};
-static char *tipstr[3];
-/* static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])]; */
+/* static char *tipstr[4]; */
+static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])];
 static multi_option_widget_t *tipsWidget = NULL;
 static widget_t *ironTempWidget;
 static widget_t *ironTempLabelWidget;
@@ -74,8 +75,7 @@ void setTip(uint16_t *value) {
 }
 
 void * getTip() {
-	/* m_tip = systemSettings.currentTip; */
-	/* m_tip = 0; */
+	m_tip = systemSettings.currentTip;
 	return &m_tip;
 }
 
@@ -157,12 +157,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 }
 
 void main_screen_setup(screen_t *scr) {
-	/* for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) { */
-	/* 	tipstr[x] = systemSettings.ironTips[x].name; */
-	/* } */
-	tipstr[0] = "K";
-	tipstr[1] = "BL";
-	tipstr[2] = "KU";
+	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
+		tipstr[x] = systemSettings.ironTips[x].name;
+	}
+	/* tipstr[0] = "K"; */
+	/* tipstr[1] = "BL"; */
+	/* tipstr[2] = "KU"; */
 	scr->draw = &default_screenDraw;
 	scr->processInput = &main_screenProcessInput;
 	/* scr->processInput = &default_screenProcessInput; */
@@ -172,9 +172,9 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_display);
-	widget->posX = 50;
+	widget->posX = 20;
 	widget->posY = 35;
-	widget->font = &Font_16x26;
+	widget->font = &Font_26x35;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -212,7 +212,7 @@ void main_screen_setup(screen_t *scr) {
 	char *s = "^C";
 	strcpy(widget->displayString, s);
 	widget->posX = 101;
-	widget->posY = 35;
+	widget->posY = 44;
 	widget->font = &Font_16x26;
 	widget->reservedChars = 2;
 	widget->draw = &default_widgetDraw;
@@ -309,9 +309,10 @@ void main_screen_setup(screen_t *scr) {
 	widget->reservedChars = 3;
 
 	widget->multiOptionWidget.options = tipstr;
-	widget->multiOptionWidget.numberOfOptions = 3;
-	/* widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips; */
+	/* widget->multiOptionWidget.numberOfOptions = 3; */
+	widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
 	tipsWidget = &widget->multiOptionWidget;
 	widget->multiOptionWidget.currentOption = 0;
 	widget->multiOptionWidget.defaultOption = 0;
+	widget->inverted = true;
 }
