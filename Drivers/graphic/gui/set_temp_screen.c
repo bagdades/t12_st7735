@@ -70,9 +70,9 @@ void set_temp_screen_setup(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	char *s = "Set Temp";
+	char *s = "SET TEMP";
 	strcpy(widget->displayString, s);
-	widget->font = &Font_11x18;
+	widget->font = &font_18m;
 	swidth = ucg_GetStrWidth(&ucg, widget->font, s);
 	widget->posX = hcenter - (swidth  / 2);
 	widget->posY = 1;
@@ -83,9 +83,9 @@ void set_temp_screen_setup(screen_t *scr) {
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_editable);
 	widget->editable.selectable.processInput = (int (*)(widget_t *, RE_Rotation_t, RE_State_t *)) &tempProcessInput;
-	widget->posX = 48;
-	widget->posY = 35;
-	widget->font = &Font_16x26;
+	widget->posX = 1;
+	widget->posY = 25;
+	widget->font = &font_53;
 	widget->fcolor = C_CYAN;
 	widget->editable.inputData.getData = &getTemp;
 	widget->editable.inputData.number_of_dec = 0;
@@ -100,13 +100,10 @@ void set_temp_screen_setup(screen_t *scr) {
 	scr->current_widget = widget;
 
 	widget = screen_addWidget(scr);
-	widgetDefaultsInit(widget, widget_label);
-	s = "^C";
-	strcpy(widget->displayString, s);
-	widget->posX = 101;
-	widget->posY = 35;
-	widget->font = &Font_16x26;
-	widget->reservedChars = 2;
+	widgetDefaultsInit(widget, widget_bmp);
+	widget->displayBmp.img = &cel;
+	widget->posX = ucg_GetXDim(&ucg) - widget->displayBmp.img->width;
+	widget->posY = ucg_GetYDim(&ucg) - widget->displayBmp.img->height - 2;
 	widget->draw = &default_widgetDraw;
 	widget->fcolor = C_CYAN;
 }

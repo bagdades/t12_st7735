@@ -59,7 +59,10 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
 Core/Src/system_stm32f1xx.c \
 Drivers/generalIO/rotary_encoder.c \
 Drivers/generalIO/adc_global.c \
-Drivers/graphic/fonts.c \
+Drivers/graphic/fonts/font18m.c \
+Drivers/graphic/fonts/font53.c \
+Drivers/graphic/fonts/cel.c \
+Drivers/graphic/fonts/logo.c \
 Drivers/graphic/st7735.c \
 Drivers/graphic/gui/gui.c \
 Drivers/graphic/gui/screen.c \

@@ -20,7 +20,7 @@
 #include "fonts.h"
 #include "st7735.h"
 #include "stm32f1xx_hal.h"
-#define SPLASH_TIMEOUT 2000
+#define SPLASH_TIMEOUT 3000
 extern ucg_t ucg;
 
 static int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);
@@ -49,7 +49,5 @@ static void splash_init(screen_t * scr) {
 }
 
 static void splash_draw(screen_t * scr) {
-	ucg_SetFont(&ucg, &Font_16x26);
-	ucg_SetForeColor(&ucg, C_RED);
-	ucg_WriteString(&ucg, 29, 29, "Hello!");
+	ucg_DrawBmp(0, 0, &logo, C_WHITE, C_BLACK);
 }

@@ -21,9 +21,11 @@
 #include "rotary_encoder.h"
 #include "iron.h"
 #include "screen.h"
+#include "st7735.h"
 #include "stm32f1xx_hal.h"
 #include "widgets.h"
 #include "settings.h"
+#include "fonts.h"
 
 
 #define NO_IRON_ADC 5000
@@ -37,6 +39,7 @@ static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.iron
 static multi_option_widget_t *tipsWidget = NULL;
 static widget_t *ironTempWidget;
 static widget_t *ironTempLabelWidget;
+extern ucg_t ucg;
 /* static widget_t *noIronWidget; */
 /* static uint16_t temp = 200; */
 /* static uint16_t temp1 = 200; */
@@ -172,9 +175,9 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_display);
-	widget->posX = 20;
-	widget->posY = 35;
-	widget->font = &Font_26x35;
+	widget->posX = 1;
+	widget->posY = 25;
+	widget->font = &font_53;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -208,13 +211,10 @@ void main_screen_setup(screen_t *scr) {
 
 	//ºC label next to iron tip temperature
 	widget = screen_addWidget(scr);
-	widgetDefaultsInit(widget, widget_label);
-	char *s = "^C";
-	strcpy(widget->displayString, s);
-	widget->posX = 101;
-	widget->posY = 44;
-	widget->font = &Font_16x26;
-	widget->reservedChars = 2;
+	widgetDefaultsInit(widget, widget_bmp);
+	widget->displayBmp.img = &cel;
+	widget->posX = ucg_GetXDim(&ucg) - widget->displayBmp.img->width;
+	widget->posY = ucg_GetYDim(&ucg) - widget->displayBmp.img->height - 2;
 	widget->draw = &default_widgetDraw;
 	widget->fcolor = C_MAGENTA;
 	ironTempLabelWidget = widget;
@@ -249,7 +249,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 1;
 	widget->posY = 1;
-	widget->font = &Font_11x18;
+	widget->font = &font_18m;
 	widget->fcolor = C_YELLOW;
 	widget->multiOptionWidget.editable.inputData.getData = &getMode;
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
@@ -276,7 +276,7 @@ void main_screen_setup(screen_t *scr) {
 	/* widget->editable.selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput; */
 	widget->posX = 48;
 	widget->posY = 1;
-	widget->font = &Font_11x18;
+	widget->font = &font_18m;
 	widget->fcolor = C_RED;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
@@ -301,7 +301,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 125;
 	widget->posY = 1;
-	widget->font = &Font_11x18;
+	widget->font = &font_18m;
 	widget->fcolor = C_CYAN;
 	widget->multiOptionWidget.editable.inputData.getData = &getTip;
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;

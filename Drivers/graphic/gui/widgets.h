@@ -77,6 +77,7 @@ typedef struct multi_option_widget_t {
 
 typedef struct bmp_wiget_t {
 	// UG_BMP bmp;
+	const tImage* img;
 } bmp_wiget_t;
 
 typedef struct label_wiget_t {
@@ -97,7 +98,7 @@ struct widget_t
 	uint8_t posX;
 	uint8_t posY;
 	// const UG_FONT *font_size;
-	FontDef *font;
+	const tFont *font;
 	widget_t *next_widget;
 	uint8_t enabled;
 	widgetType type;

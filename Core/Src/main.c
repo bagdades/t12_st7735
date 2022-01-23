@@ -94,7 +94,6 @@ void malloc_fragmentation_fix(void){
 }
 
 void Init(void) {
-	LCD_SPI_HAND->CR1 |= SPI_CR1_SPE;
 	ucg.x_dim = ST7735_WIDTH;
 	ucg.y_dim = ST7735_HEIGHT;
 	ucg_Init();
@@ -568,7 +567,7 @@ void Error_Handler(void)
 	/* USER CODE BEGIN Error_Handler_Debug */
 	ucg_SetBackColor(&ucg, C_BLACK);
 	ucg_FillScreen(&ucg);
-	ucg_SetFont(&ucg, &Font_11x18);
+	ucg_SetFont(&ucg, &font_18m);
 	ucg_SetForeColor(&ucg, C_RED);
 	char strOut[16];
 	uint8_t outPos=0;
@@ -581,7 +580,7 @@ void Error_Handler(void)
 	while(1){                                                  // Divide string in chuncks that fit teh screen width
 		strOut[outPos] = file[inPos];                            // Copy char
 		strOut[outPos+1] = 0;                                    // Set out string null terminator
-		uint8_t currentWidth = ucg_GetStrWidth(&ucg, &Font_11x18, strOut);  // Get width
+		uint8_t currentWidth = ucg_GetStrWidth(&ucg, &font_18m, strOut);  // Get width
 		if(currentWidth < ucg_GetXDim(&ucg)){                              // If less than oled width, increase input string pos
 			inPos++;
 		}

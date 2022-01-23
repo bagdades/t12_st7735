@@ -242,7 +242,8 @@ typedef struct ucg_t
     uint16_t y_dim;
     uint16_t backcolor;
     uint16_t forecolor;
-    FontDef* font;
+    // FontDef* font;
+    const tFont* font;
 }ucg_t;
 
 
@@ -270,15 +271,16 @@ void ucg_SetBackColor(ucg_t* ucg, uint16_t color);
 void ucg_SetForeColor(ucg_t* ucg, uint16_t color);
 uint16_t ucg_GetBackColor(ucg_t* ucg);
 uint16_t ucg_GetForeColor(ucg_t* ucg);
-void ucg_SetFont(ucg_t* ucg, FontDef* font);
-FontDef* ucg_GetFont(ucg_t *ucg);
+void ucg_SetFont(ucg_t* ucg, const tFont* font);
+const tFont* ucg_GetFont(ucg_t *ucg);
 void ucg_DrawLine(ucg_t* ucg, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void ucg_DrawArc(ucg_t* ucg, int16_t x0, int16_t y0, int16_t r, uint8_t s);
 void ucg_DrawCircle(ucg_t* ucg, int16_t x0, int16_t y0, int16_t r);
 void ucg_DrawRBox(ucg_t *ucg, int16_t x, int16_t y, int16_t w, int16_t h, int16_t r);
 void ucg_DrawRoundFrame(ucg_t* ucg, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t r);
 void ucg_DrawRectangle(ucg_t* ucg, uint8_t x, uint8_t y, uint8_t w, uint8_t h);
-uint8_t ucg_GetStrWidth(ucg_t *ucg, FontDef* font, const char *str);
+uint8_t ucg_GetStrWidth(ucg_t *ucg, const tFont* font, const char *str);
 void ucg_InvertColors(bool invert);
+void ucg_DrawBmp(uint16_t x, uint16_t y, const tImage* img, uint16_t color, uint16_t bgcolor);
 
 #endif // __ST7735_H__

@@ -79,7 +79,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->update = &default_widgetUpdate;
 	w->enabled = 1;
 	/* w->font_size = &FONT_8X14; */
-	w->font = &Font_7x10;;
+	w->font = &font_18m;
 	w->fcolor = fcolor;
 	w->bcolor = bcolor;
 	w->refresh = refresh_always;
@@ -179,7 +179,7 @@ void default_widgetUpdate(widget_t *widget) {
 		return;
 	if(dis->getData)
 		data = dis->getData();
-	ucg_SetFont(&ucg, widget->font);
+	ucg_SetFont(&ucg, (tFont*)widget->font);
 	uint16_t val_ui16;
 	char *str;
 	switch (widget->type) {
@@ -234,10 +234,10 @@ void default_widgetDraw(widget_t *widget) {
 	ucg_SetForeColor(&ucg, widget->fcolor);
 	uint8_t draw_frame = 0;
 	uint8_t draw_box = 0;
-	/* if(widget->type == widget_bmp) { */
-	/* 	UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp.bmp); */
-	/* 	return; */
-	/* } */
+	if(widget->type == widget_bmp) {
+		ucg_DrawBmp(widget->posX, widget->posY, widget->displayBmp.img, widget->fcolor, widget->bcolor);
+		return;
+	}
 	bool refresh = widget->refresh | widget->parent->refresh;
 	selectable_widget_t *sel;
 	if((widget->type == widget_editable || widget->type == widget_multi_option || widget->type == widget_button)) {
@@ -283,26 +283,27 @@ void default_widgetDraw(widget_t *widget) {
 			if(widget->refresh == refresh_idle && !widget->parent->refresh)
 				return;
 		}
-		ucg_SetFont(&ucg, widget->font);
+		ucg_SetFont(&ucg, (tFont*)widget->font);
 		if(draw_box) {                          /* erase before draw */
 			uint16_t c = ucg_GetForeColor(&ucg);
+			uint16_t w = ucg_GetStrWidth(&ucg, (tFont*)widget->font, widget->displayString);
 			ucg_SetForeColor(&ucg, widget->bcolor);
 			ucg_FillRectangle(&ucg, widget->posX - 1, widget->posY - 1, 
-					widget->reservedChars * widget->font->width + 1, widget->font->height + 1);
+					w + 2, widget->font->chars[0].image->height + 1);
 			ucg_SetForeColor(&ucg, c);
 		}
-		char space[sizeof(widget->displayString)] = "            ";
+		/* char space[sizeof(widget->displayString)] = "            "; */
 		if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)) {
-			space[widget->reservedChars] = (char)'\0';
-			ucg_WriteString(&ucg, widget->posX, widget->posY, space);
+			/* space[widget->reservedChars] = (char)'\0'; */
+			/* ucg_WriteString(&ucg, widget->posX, widget->posY, space); */
 			widget->displayString[widget->reservedChars] = (char)'\0';
 			ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
 		}
 		else if(extractDisplayPartFromWidget(widget)->type == field_string) {
 			ucg_SetBackColor(&ucg, widget->bcolor);
 			ucg_SetForeColor(&ucg, widget->fcolor);
-			space[widget->reservedChars] = (char)'\0';
-			ucg_WriteString(&ucg, widget->posX, widget->posY, space);
+			/* space[widget->reservedChars] = (char)'\0'; */
+			/* ucg_WriteString(&ucg, widget->posX, widget->posY, space); */
 			widget->displayString[widget->reservedChars] = (char)'\0';
 			ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
 			/* if(extractSelectablePartFromWidget(widget)->state == widget_edit) */
@@ -313,9 +314,10 @@ void default_widgetDraw(widget_t *widget) {
 			ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
 		}
 		if(draw_frame) {
+			uint16_t w = ucg_GetStrWidth(&ucg, (tFont*)widget->font, widget->displayString);
 			ucg_SetForeColor(&ucg, fcolor);
 			ucg_DrawRectangle(&ucg, widget->posX - 1, widget->posY - 1, 
-					widget->reservedChars * widget->font->width + 1, widget->font->height + 1);
+					w + 2, widget->font->chars[0].image->height + 1);
 		}
 		widget->refresh = refresh_idle;
 	}
@@ -324,7 +326,7 @@ void default_widgetDraw(widget_t *widget) {
 
 void comboBoxDraw(widget_t *widget) {
 	uint16_t yDim = ucg_GetYDim(&ucg) - widget->posY;
-	uint16_t height = widget->font->height;
+	uint16_t height = widget->font->chars[0].image->height;
 	height += 2;
 	comboBox_item_t *item = widget->comboBoxWidget.items;
 	uint8_t scroll = 0;
@@ -337,7 +339,7 @@ void comboBoxDraw(widget_t *widget) {
 			if(item->enabled)
 				++scroll;
 		}
-		ucg_SetFont(&ucg, widget->font);
+		ucg_SetFont(&ucg, (tFont*)widget->font);
 		for(uint8_t x = 0; x < yDim / height; ++x) {
 			ucg_SetForeColor(&ucg, bcolor);
 			ucg_FillRectangle(&ucg, 0, x * height + widget->posY - 1, ucg_GetXDim(&ucg), height);
@@ -371,7 +373,7 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
 	uint8_t firstIndex = widget->comboBoxWidget.currentScroll;
 	uint16_t yDim = ucg_GetYDim(&ucg) - widget->posY;
-	uint16_t height = widget->font->height;
+	uint16_t height = widget->font->chars[0].image->height;
 	height += 2;
 	uint8_t maxIndex = yDim / height;
 	uint8_t lastIndex = widget->comboBoxWidget.currentScroll + maxIndex -1;

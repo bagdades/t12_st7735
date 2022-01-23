@@ -171,6 +171,7 @@ static void ST7735_SetAddressWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t 
 }
 
 void ucg_Init() {
+	LCD_SPI_HAND->CR1 |= SPI_CR1_SPE;
     ST7735_Select();
     ST7735_Reset();
     ST7735_ExecuteCommandList(init_cmds1);
@@ -191,52 +192,82 @@ void ucg_DrawPixel(ucg_t* ucg, uint16_t x, uint16_t y) {
 
     ST7735_Unselect();
 }
-
-static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef* font, uint16_t color, uint16_t bgcolor) {
+static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, const tFont* font, uint16_t color, uint16_t bgcolor) {
     uint32_t i, b, j;
+    uint8_t chr;
+    uint8_t n, m;
+    n = m = 0;
 
-    ST7735_SetAddressWindow(x, y, x+font->width-1, y+font->height-1);
+    chr = ch - font->chars[0].code;
+    /* if(!chr) return; */
+    ST7735_SetAddressWindow(x, y, x+font->chars[chr].image->width - 1, y+font->chars[chr].image->height - 1);
 
-    if(font->width > 16) {
-        for(i = 0; i < font->height * 2; i++) {
-            b = font->data[(ch - 32) * 70 + i];
-            for(j = 0; j < 16; j++) {
-                if((b << j) & 0x8000)  {
-                    uint8_t data[] = { color >> 8, color & 0xFF };
-                    ST7735_WriteData(data, sizeof(data));
-                } else {
-                    uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
-                    ST7735_WriteData(data, sizeof(data));
-                }
+    b = font->chars[chr].image->data[m++];
+    for(i = 0; i < font->chars[chr].image->height; i++) {
+        /* n = 0; */
+        for(j = 0; j < font->chars[chr].image->width; j++) {
+            if(b & 0x8000)  {
+                uint8_t data[] = { color >> 8, color & 0xFF };
+                ST7735_WriteData(data, sizeof(data));
+            } else {
+                uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+                ST7735_WriteData(data, sizeof(data));
             }
-            i++;
-            b = font->data[(ch - 32) * 70 + i];
-            for(j = 0; j < 10; j++) {
-                if((b << j) & 0x8000)  {
-                    uint8_t data[] = { color >> 8, color & 0xFF };
-                    ST7735_WriteData(data, sizeof(data));
-                } else {
-                    uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
-                    ST7735_WriteData(data, sizeof(data));
-                }
+            n++;
+            b = b << 1;
+            if(n == 16) {
+                n = 0;
+                b = font->chars[chr].image->data[m++];
             }
         }
     }
-        else {
-            for(i = 0; i < font->height; i++) {
-                b = font->data[(ch - 32) * font->height + i];
-                for(j = 0; j < font->width; j++) {
-                    if((b << j) & 0x8000)  {
-                        uint8_t data[] = { color >> 8, color & 0xFF };
-                        ST7735_WriteData(data, sizeof(data));
-                    } else {
-                        uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
-                        ST7735_WriteData(data, sizeof(data));
-                    }
-                }
-            }
-        }
 }
+
+/* static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef* font, uint16_t color, uint16_t bgcolor) { */
+/*     uint32_t i, b, j; */
+/*  */
+/*     ST7735_SetAddressWindow(x, y, x+font->width-1, y+font->height-1); */
+/*  */
+/*     if(font->width > 16) { */
+/*         for(i = 0; i < font->height * 2; i++) { */
+/*             b = font->data[(ch - 32) * 70 + i]; */
+/*             for(j = 0; j < 16; j++) { */
+/*                 if((b << j) & 0x8000)  { */
+/*                     uint8_t data[] = { color >> 8, color & 0xFF }; */
+/*                     ST7735_WriteData(data, sizeof(data)); */
+/*                 } else { */
+/*                     uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF }; */
+/*                     ST7735_WriteData(data, sizeof(data)); */
+/*                 } */
+/*             } */
+/*             i++; */
+/*             b = font->data[(ch - 32) * 70 + i]; */
+/*             for(j = 0; j < 10; j++) { */
+/*                 if((b << j) & 0x8000)  { */
+/*                     uint8_t data[] = { color >> 8, color & 0xFF }; */
+/*                     ST7735_WriteData(data, sizeof(data)); */
+/*                 } else { */
+/*                     uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF }; */
+/*                     ST7735_WriteData(data, sizeof(data)); */
+/*                 } */
+/*             } */
+/*         } */
+/*     } */
+/*         else { */
+/*             for(i = 0; i < font->height; i++) { */
+/*                 b = font->data[(ch - 32) * font->height + i]; */
+/*                 for(j = 0; j < font->width; j++) { */
+/*                     if((b << j) & 0x8000)  { */
+/*                         uint8_t data[] = { color >> 8, color & 0xFF }; */
+/*                         ST7735_WriteData(data, sizeof(data)); */
+/*                     } else { */
+/*                         uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF }; */
+/*                         ST7735_WriteData(data, sizeof(data)); */
+/*                     } */
+/*                 } */
+/*             } */
+/*         } */
+/* } */
 
 /*
 Simpler (and probably slower) implementation:
@@ -255,15 +286,16 @@ static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint
 }
 */
 
-
 void ucg_WriteString(ucg_t* ucg, uint16_t x, uint16_t y, const char* str) {
     ST7735_Select();
+    uint8_t chr;
 
     while(*str) {
-        if(x + ucg->font->width >= ST7735_WIDTH) {
+        chr = *str - ucg->font->chars[0].code;
+        if(x + ucg->font->chars[chr].image->width >= ST7735_WIDTH) {
             x = 0;
-            y += ucg->font->height;
-            if(y + ucg->font->height >= ST7735_HEIGHT) {
+            y += ucg->font->chars[chr].image->height;
+            if(y + ucg->font->chars[chr].image->height >= ST7735_HEIGHT) {
                 break;
             }
 
@@ -275,12 +307,38 @@ void ucg_WriteString(ucg_t* ucg, uint16_t x, uint16_t y, const char* str) {
         }
 
         ST7735_WriteChar(x, y, *str, ucg->font, ucg->forecolor, ucg->backcolor);
-        x += ucg->font->width;
+        x += ucg->font->chars[chr].image->width;
         str++;
     }
 
     ST7735_Unselect();
 }
+
+/* void ucg_WriteString(ucg_t* ucg, uint16_t x, uint16_t y, const char* str) { */
+/*     ST7735_Select(); */
+/*  */
+/*     while(*str) { */
+/*         if(x + ucg->font->width >= ST7735_WIDTH) { */
+/*             x = 0; */
+/*             y += ucg->font->height; */
+/*             if(y + ucg->font->height >= ST7735_HEIGHT) { */
+/*                 break; */
+/*             } */
+/*  */
+/*             if(*str == ' ') { */
+/*                 // skip spaces in the beginning of the new line */
+/*                 str++; */
+/*                 continue; */
+/*             } */
+/*         } */
+/*  */
+/*         ST7735_WriteChar(x, y, *str, ucg->font, ucg->forecolor, ucg->backcolor); */
+/*         x += ucg->font->width; */
+/*         str++; */
+/*     } */
+/*  */
+/*     ST7735_Unselect(); */
+/* } */
 
 void ucg_FillCircle(ucg_t* ucg, int16_t x0, int16_t y0, int16_t r) {
    int16_t  x,y,xd;
@@ -458,12 +516,12 @@ uint16_t ucg_GetForeColor(ucg_t* ucg) {
     return color;
 }
 
-void ucg_SetFont(ucg_t* ucg, FontDef* font) {
+void ucg_SetFont(ucg_t* ucg, const tFont* font) {
     ucg->font = font;
 }
 
-FontDef* ucg_GetFont(ucg_t *ucg) {
-    FontDef *font;
+const tFont* ucg_GetFont(ucg_t *ucg) {
+    const tFont *font;
     font = ucg->font;
     return font;
 }
@@ -661,14 +719,16 @@ uint16_t ucg_GetXDim(ucg_t *ucg) {
 }
 
 //Return width in pixel include distance beetween chars
-uint8_t ucg_GetStrWidth(ucg_t *ucg, FontDef* font, const char *str) {
+uint8_t ucg_GetStrWidth(ucg_t *ucg, const tFont* font, const char *str) {
     uint8_t w = 0;
+    uint8_t chr;
     while (*str) {
-        w += font->width;
-        w += 1;
+        chr = *str - font->chars[0].code;
+        w += font->chars[chr].image->width;
+        /* w += 1; */
         str++;
     }
-    w -= 1;
+    /* w -= 1; */
     return w;
 }
 
@@ -678,3 +738,35 @@ void ucg_InvertColors(bool invert) {
     ST7735_Unselect();
 }
 
+void ucg_DrawBmp(uint16_t x, uint16_t y, const tImage* img, uint16_t color, uint16_t bgcolor) {
+    uint16_t b;
+    uint8_t n;
+    uint16_t m;
+    n = 0;
+    m = 0;
+    if((x >= ST7735_WIDTH) || (y >= ST7735_HEIGHT)) return;
+    if((x + img->width - 1) >= ST7735_WIDTH) return;
+    if((y + img->height - 1) >= ST7735_HEIGHT) return;
+
+    ST7735_Select();
+    ST7735_SetAddressWindow(x, y, x+img->width - 1, y+img->height - 1);
+    b = img->data[m++];
+    for (uint8_t i = 0; i < img->height; i++) {
+        for (uint8_t j = 0; j < img->width; j++) {
+            if(b & 0x8000)  {
+                uint8_t data[] = { color >> 8, color & 0xFF };
+                ST7735_WriteData(data, sizeof(data));
+            } else {
+                uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+                ST7735_WriteData(data, sizeof(data));
+            }
+            n++;
+            b = b << 1;
+            if(n == 16) {
+                n = 0;
+                b = img->data[m++];
+            }
+        }
+    }
+    ST7735_Unselect();
+}

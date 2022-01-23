@@ -80,9 +80,9 @@ void set_tip_screen_setup(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	char *s = "Tip Select";
+	char *s = "TIP SELECT";
 	strcpy(widget->displayString, s);
-	widget->font = &Font_11x18;
+	widget->font = &font_18m;
 	swidth = ucg_GetStrWidth(&ucg, widget->font, s);
 	widget->posX = hcenter - (swidth  / 2);
 	widget->posY = 1;
@@ -95,7 +95,7 @@ void set_tip_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 48;
 	widget->posY = 35;
-	widget->font = &Font_16x26;
+	widget->font = &font_18m;
 	widget->fcolor = C_CYAN;
 	/* widget->multiOptionWidget.editable.selectable.processInput = (int (*)(widget_t *, RE_Rotation_t, RE_State_t *)) &tipProcessInput; */
 	widget->multiOptionWidget.editable.inputData.getData = &gTip;
