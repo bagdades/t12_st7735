@@ -26,6 +26,7 @@
 #include "widgets.h"
 #include "settings.h"
 #include "fonts.h"
+#include "tempsensors.h"
 
 
 #define NO_IRON_ADC 5000
@@ -41,40 +42,43 @@ static widget_t *ironTempWidget;
 static widget_t *ironTempLabelWidget;
 extern ucg_t ucg;
 /* static widget_t *noIronWidget; */
-/* static uint16_t temp = 200; */
+static uint16_t temp = 200;
 /* static uint16_t temp1 = 200; */
 /* static uint16_t power = 100; */
 
 int boostOn(widget_t *w) {
-	/* setCurrentMode(mode_boost); */
+	setCurrentMode(mode_boost);
 	m_mode = 1;
 	return -1;
 }
 
 static void * main_screen_getIronTemp() {
-	/* temp = readTipTemperatureCompensated(0); */
-	/* temp = 320; */
-	/* temp++; */
+	temp = readTipTemperatureCompensated(0);
 	/* HAL_Delay(500); */
 	return &m_temp;
+	/* return &temp; */
+}
+
+static void *getTemp() {
+  m_temp = getSetTemperature();
+  return &m_temp;
 }
 
 void setMode(uint16_t *value) {
 	m_mode = *value;
-	/* setCurrentMode((iron_mode_t)m_mode); */
+	setCurrentMode((iron_mode_t)m_mode);
 }
 
 void * getMode() {
-	/* m_mode = getCurrentMode(); */
-	/* m_mode = 1; */
+	m_mode = getCurrentMode();
 	return &m_mode;
 }
 
 void setTip(uint16_t *value) {
 	m_tip = *value;
-	/* systemSettings.currentTip = m_tip; */
-	/* saveSettings(); */
-	/* setCurrentTip(m_tip); */
+	systemSettings.currentTip = m_tip;
+	saveSettings();
+	setCurrentTip(m_tip);
 }
 
 void * getTip() {
@@ -88,29 +92,8 @@ void * getTip() {
 /* 	return &temp1; */
 /* } */
 
-/* static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) { */
-/* 	switch (w->editable.selectable.state) { */
-/* 		case widget_selected: */
-/* 			#<{(| if(r == Click && getCurrentMode() != mode_set) |)}># */
-/* 			#<{(| 	setCurrentMode(mode_set); |)}># */
-/* 			break; */
-/* 		case widget_edit: */
-/* 			#<{(| if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set) { |)}># */
-/* 			#<{(| 	setCurrentMode(mode_set); |)}># */
-/* 			#<{(| 	return -1; |)}># */
-/* 			#<{(| } |)}># */
-/* 			break; */
-/* 		default: */
-/* 			break; */
-/* 	} */
-/* 	return default_widgetProcessInput(w, r, s); */
-/* } */
-
 static void main_screen_init(screen_t *scr) {
-	/* UG_FontSetHSpace(0); */
-	/* UG_FontSetVSpace(0); */
-	/* tipsWidget->numberOfOptions = systemSettings.currentNumberOfTips; */
-	tipsWidget->numberOfOptions = 3;
+	tipsWidget->numberOfOptions = systemSettings.currentNumberOfTips;
 	default_init(scr);
 }
 
@@ -148,6 +131,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	switch (r) {
 		case Click:
 			ret = screen_set_temp;
+			setCurrentMode(mode_set);
 			return ret;
 		case LongClick:
 			ret = screen_settings;
@@ -182,7 +166,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
 	widget->reservedChars = 3;
-	widget->fcolor = C_MAGENTA;
+	widget->fcolor = C_GREEN;
 	widget->refresh = refresh_triggered;
 	ironTempWidget = widget;
 
@@ -216,7 +200,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = ucg_GetXDim(&ucg) - widget->displayBmp.img->width;
 	widget->posY = ucg_GetYDim(&ucg) - widget->displayBmp.img->height - 2;
 	widget->draw = &default_widgetDraw;
-	widget->fcolor = C_MAGENTA;
+	widget->fcolor = C_GREEN;
 	ironTempLabelWidget = widget;
 
 	/* widget = screen_addWidget(scr); */
@@ -277,8 +261,8 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 48;
 	widget->posY = 1;
 	widget->font = &font_18m;
-	widget->fcolor = C_RED;
-	widget->displayWidget.getData = &main_screen_getIronTemp;
+	widget->fcolor = C_MAGENTA;
+	widget->displayWidget.getData = &getTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
 	widget->reservedChars = 3;
@@ -299,14 +283,17 @@ void main_screen_setup(screen_t *scr) {
 	// tips
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_multi_option);
-	widget->posX = 125;
+	widget->posX = 115;
 	widget->posY = 1;
+	widget->width = 44;
 	widget->font = &font_18m;
 	widget->fcolor = C_CYAN;
 	widget->multiOptionWidget.editable.inputData.getData = &getTip;
+	/* widget->multiOptionWidget.editable.inputData.textAlign = align_center; */
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
-	widget->reservedChars = 3;
+	widget->multiOptionWidget.editable.inputData.textAlign = align_right;
+	widget->reservedChars = 4;
 
 	widget->multiOptionWidget.options = tipstr;
 	/* widget->multiOptionWidget.numberOfOptions = 3; */

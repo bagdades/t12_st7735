@@ -18,6 +18,8 @@
 
 #include "set_tip_screen.h"
 #include "settings.h"
+#include "st7735.h"
+#include "tempsensors.h"
 
 extern ucg_t ucg;
 uint16_t m_tip= 0;
@@ -34,7 +36,7 @@ void sTip(uint16_t *value) {
 	m_tip = *value;
 	systemSettings.currentTip = m_tip;
 	saveSettings();
-	/* setCurrentTip(m_tip); */
+	setCurrentTip(m_tip);
 }
 
 static int set_tip_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -66,8 +68,8 @@ static int set_tip_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 /* } */
 
 void set_tip_screen_setup(screen_t *scr) {
-	uint8_t hcenter = ucg_GetXDim(&ucg) / 2;
-	uint8_t swidth;
+	/* uint8_t hcenter = ucg_GetXDim(&ucg) / 2; */
+	/* uint8_t swidth; */
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
 		tipstr[x] = systemSettings.ironTips[x].name;
 	}
@@ -83,9 +85,11 @@ void set_tip_screen_setup(screen_t *scr) {
 	char *s = "TIP SELECT";
 	strcpy(widget->displayString, s);
 	widget->font = &font_18m;
-	swidth = ucg_GetStrWidth(&ucg, widget->font, s);
-	widget->posX = hcenter - (swidth  / 2);
+	/* swidth = ucg_GetStrWidth(&ucg, widget->font, s); */
+	widget->posX = 0;
 	widget->posY = 1;
+	widget->displayWidget.textAlign = align_center;
+	widget->width = ucg_GetXDim(&ucg);
 	widget->fcolor = C_YELLOW;
 	widget->reservedChars = 10;
 	widget->draw = default_widgetDraw;
@@ -107,7 +111,7 @@ void set_tip_screen_setup(screen_t *scr) {
 	widget->multiOptionWidget.editable.selectable.state = widget_edit;
 	widget->multiOptionWidget.editable.setData = (void (*)(void *))&sTip;
 
-	widget->reservedChars = 3;
+	widget->reservedChars = 4;
 
 	widget->multiOptionWidget.options = tipstr;
 	/* widget->multiOptionWidget.numberOfOptions = 3; */

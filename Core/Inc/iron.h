@@ -9,7 +9,7 @@
 #define IRON_H_
 
 #include "stm32f1xx_hal.h"
-// #include "pid.h"
+#include "pid.h"
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 
@@ -32,7 +32,7 @@ typedef struct tipData {
 	uint16_t calADC_At_300;
 	uint16_t calADC_At_400;
 	char name[5];
-	// pid_values_t PID;
+	pid_values_t PID;
 } tipData;
 
 ironSleep_t currentSleepSettings;

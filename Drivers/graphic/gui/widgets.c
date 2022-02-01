@@ -12,7 +12,7 @@
 #include <string.h>
 
 extern ucg_t ucg;
-uint16_t fcolor = C_GREEN;
+uint16_t fcolor = C_CYAN;
 uint16_t bcolor = C_BLACK;
 
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
@@ -86,6 +86,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->inverted = 0;
 	w->posX = 0;
 	w->posY = 0;
+	w->width = 0;
 	w->reservedChars = 5;
 	w->next_widget = NULL;
 	selectable_widget_t *sel;
@@ -106,6 +107,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->displayWidget.number_of_dec = 0;
 			w->displayWidget.type = field_uinteger16;
 			w->displayWidget.last_value = 0;
+			w->displayWidget.textAlign = align_disabled;
 			/* w->displayWidget.update = &default_widgetUpdate; */
 			break;
 		case widget_editable:
@@ -119,6 +121,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->editable.selectable.tab = 0;
 			w->editable.max_value = 0xFFFF;
 			w->editable.min_value = 0;
+			w->editable.inputData.textAlign = align_disabled;
 			break;
 		case widget_multi_option:
 			w->multiOptionWidget.editable.big_step = 10;
@@ -135,6 +138,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->multiOptionWidget.defaultOption = 0;
 			w->multiOptionWidget.numberOfOptions = 0;
 			w->multiOptionWidget.options = NULL;
+			w->multiOptionWidget.editable.inputData.textAlign = align_disabled;
 			break;
 		case widget_combo:
 			w->comboBoxWidget.currentItem = NULL;
@@ -149,6 +153,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 		case widget_label:
 			/* w->label.label.update = &default_widgetUpdate; */
 			w->label.label.getData = NULL;
+			w->label.label.textAlign = align_disabled;
 			break;
 		default:
 			break;
@@ -239,6 +244,7 @@ void default_widgetDraw(widget_t *widget) {
 		return;
 	}
 	bool refresh = widget->refresh | widget->parent->refresh;
+	displayOnly_widget_t* dis = extractDisplayPartFromWidget(widget);
 	selectable_widget_t *sel;
 	if((widget->type == widget_editable || widget->type == widget_multi_option || widget->type == widget_button)) {
 		sel = extractSelectablePartFromWidget(widget);
@@ -260,6 +266,7 @@ void default_widgetDraw(widget_t *widget) {
 		}
 	}
 	if (refresh) {
+		if(dis) widgetAlign(widget);
 		if(sel) {
 			switch (sel->state) {
 				case widget_edit:
@@ -292,16 +299,27 @@ void default_widgetDraw(widget_t *widget) {
 					w + 2, widget->font->chars[0].image->height + 1);
 			ucg_SetForeColor(&ucg, c);
 		}
-		/* char space[sizeof(widget->displayString)] = "            "; */
-		if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)) {
-			/* space[widget->reservedChars] = (char)'\0'; */
-			/* ucg_WriteString(&ucg, widget->posX, widget->posY, space); */
+		char space[sizeof(widget->displayString)] = "            ";
+		if((widget->type != widget_label) && (dis->type != field_string)) {
+			if(widget->font->chars[0].code == ' ') {
+				space[widget->reservedChars] = (char)'\0';
+				ucg_WriteString(&ucg, widget->posX, widget->posY, space);
+			}
 			widget->displayString[widget->reservedChars] = (char)'\0';
-			ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
+			//Default width = 0
+			if(widget->width) {
+				ucg_WriteString(&ucg, dis->stringStart, widget->posY, widget->displayString);
+			} else {
+				ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
+			}
 		}
-		else if(extractDisplayPartFromWidget(widget)->type == field_string) {
+		else if(dis->type == field_string) {
 			ucg_SetBackColor(&ucg, widget->bcolor);
 			ucg_SetForeColor(&ucg, widget->fcolor);
+			if(widget->font->chars[0].code == ' ') {
+				space[widget->reservedChars] = (char)'\0';
+				ucg_WriteString(&ucg, widget->posX, widget->posY, space);
+			}
 			/* space[widget->reservedChars] = (char)'\0'; */
 			/* ucg_WriteString(&ucg, widget->posX, widget->posY, space); */
 			widget->displayString[widget->reservedChars] = (char)'\0';
@@ -311,7 +329,13 @@ void default_widgetDraw(widget_t *widget) {
 		}
 		else
 		{
-			ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
+			//Default width = 0
+			if(widget->width) {
+				ucg_WriteString(&ucg, dis->stringStart, widget->posY, widget->displayString);
+			} else {
+				ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
+			}
+			/* ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString); */
 		}
 		if(draw_frame) {
 			uint16_t w = ucg_GetStrWidth(&ucg, (tFont*)widget->font, widget->displayString);
@@ -632,4 +656,32 @@ void widgetDetectChange(widget_t* w, int32_t val){
 	if(refresh && w->refresh==refresh_idle){
 		w->refresh=refresh_triggered;
 	}
+}
+
+void widgetAlign(widget_t* widget) {
+	uint8_t strWidth;
+	uint8_t strStart = 0;
+	uint8_t textAlign = align_disabled;
+	displayOnly_widget_t* dis = extractDisplayPartFromWidget(widget);
+	if(dis->textAlign == align_disabled)
+		return;
+	strWidth = ucg_GetStrWidth(&ucg, widget->font, widget->displayString);
+	textAlign = dis->textAlign;
+	switch (textAlign) {
+		case align_disabled:
+			break;
+		case align_center:
+			if(widget->width)
+				strStart = widget->posX + ((widget->width - strWidth) / 2);
+			break;
+		case align_left:
+			break;
+		case align_right:
+			if(widget->width)
+				strStart = widget->posX + widget->width - strWidth;
+			break;
+		default:
+			break;
+	}
+	dis->stringStart = strStart;
 }

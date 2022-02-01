@@ -3,9 +3,13 @@
 #include "st7735.h"
 #include "stm32f1xx_hal_spi.h"
 #include "main.h"
+#include "settings.h"
 #include <stdint.h>
+#include "iron.h"
+#include "gui_strings.h"
 
 #define DELAY 0x80
+extern ucg_t ucg;
 
 // based on Adafruit ST7735 library for Arduino
 static const uint8_t
@@ -769,4 +773,77 @@ void ucg_DrawBmp(uint16_t x, uint16_t y, const tImage* img, uint16_t color, uint
         }
     }
     ST7735_Unselect();
+}
+
+void Reset_onError(void){
+  __disable_irq();
+  while(BUTTON_input()){                    // Wait until the button is pressed
+    for(uint16_t i=0;i<50000;i++);          // Small delay
+    /* HAL_IWDG_Refresh(&hiwdg);               // Clear watchdog */
+  }
+  while(!BUTTON_input()){                   // Wait until the button is released
+    for(uint16_t i=0;i<50000;i++);          // Small delay
+    /* HAL_IWDG_Refresh(&hiwdg);               // Clear watchdog */
+  }
+  NVIC_SystemReset();                       // Reset system
+}
+
+void FatalError(uint8_t type){
+    /* uint8_t lang =systemSettings.settings.language; */
+    /* if(lang>(LANGUAGE_COUNT-1)){ */
+    /*     lang=lang_english; */
+    /* } */
+    /*  */
+    /* setSafeMode(enable); */
+    /* buzzer_fatal_beep(); */
+    /* Oled_error_init(); */
+/*     switch(type){ */
+/*         case error_FLASH: */
+/*             ucg_WriteString(&ucg, 1, 1, "FLASH ERROR"); */
+/*             break; */
+/*         case error_NMI: */
+/*             ucg_WriteString(&ucg, 1, 1, "NMI HANDLER"); */
+/*             break; */
+/*             break; */
+/*         case error_HARDFAULT: */
+/*             ucg_WriteString(&ucg, 1, 1, "HARD FAULT"); */
+/*             break; */
+/*             break; */
+/*         case error_MEMMANAGE: */
+/*             ucg_WriteString(&ucg, 1, 1, "MEM MANAGE"); */
+/*             break; */
+/*             break; */
+/*         case error_BUSFAULT: */
+/*             ucg_WriteString(&ucg, 1, 1, "BUS FAULT"); */
+/*             break; */
+/*             break; */
+/*         case error_USAGEFAULT: */
+/*             ucg_WriteString(&ucg, 1, 1, "USAGE FAULT"); */
+/*             break; */
+/*             break; */
+/*         case error_RUNAWAY25: */
+/*         case error_RUNAWAY50: */
+/*         case error_RUNAWAY75: */
+/*         case error_RUNAWAY100: */
+/*             { */
+/*                 uint8_t level = 25 * ((type - error_RUNAWAY25)+1); */
+/*                 char strRunawayLevel[8]; */
+/*                 sprintf(strRunawayLevel,">%u\n",level); */
+/*                 ucg_WriteString(&ucg, 1, 1, strings[lang].ERROR_RUNAWAY); */
+/*                 ucg_WriteString(&ucg, 1, 15, strRunawayLevel); */
+/*                 break; */
+/*             } */
+/*         case error_RUNAWAY500: */
+/*             ucg_WriteString(&ucg, 1, 1, strings[lang].ERROR_EXCEEDED); */
+/*             ucg_WriteString(&ucg, 1, 15, "500 C!"); */
+/*             break; */
+/*  */
+/*         default: */
+/*             ucg_WriteString(&ucg, 1, 1, strings[lang].ERROR_UNKNOWN); */
+/*             break; */
+/*     } */
+/*     ucg_WriteString(&ucg, 1, 1, strings[lang].ERROR_SYSTEM_HALTED); */
+/*     ucg_WriteString(&ucg, 1, 1, strings[lang].ERROR_BTN_RESET); */
+/*  */
+/*     Reset_onError(); */
 }

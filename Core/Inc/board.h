@@ -12,20 +12,6 @@
 #define HWSTRING "HW: KSGER v3.x"
 
 /********************************
- *       Display Settings    *
- ********************************/
-#define OLED_SPI                                              // SPI display
-//#define OLED_I2C                                            // I2C display
-//#define I2C_TRY_HW                                          // Try I2C HW first, use I2C SW if not detected
-//#define OLED_ADDRESS      (0x3c<<1)                         // Only used for i2c
-#define OLED_DEVICE         hspi2                             // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used
-#define FILL_DMA            hdma_memtomem_dma1_channel2       // DMA mem2mem for filling
-#define USE_RST                                               // Reset pin is used
-#define USE_DC                                                // DC pin is used
-//#define USE_CS                                              // CS pin is used
-#define OLED_OFFSET         2                                 // Display offset
-
-/********************************
  *      PWM Settings        *
  ********************************/
 //#define PWM_TIMER_HALFCLOCK                                 // Timer runs at FCY/2
@@ -105,7 +91,7 @@
 
 #ifdef USE_NTC
 
-#define NTC_RES       10000
+// #define NTC_RES       10000
 #define NTC_BETA      3450
 #define PULL_RES      4700
 #define PULLUP

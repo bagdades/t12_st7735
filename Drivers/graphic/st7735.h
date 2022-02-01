@@ -246,6 +246,20 @@ typedef struct ucg_t
     const tFont* font;
 }ucg_t;
 
+typedef enum{
+	error_NMI,
+	error_HARDFAULT,
+	error_MEMMANAGE,
+	error_BUSFAULT,
+	error_USAGEFAULT,
+	error_RUNAWAY25,
+	error_RUNAWAY50,
+	error_RUNAWAY75,
+	error_RUNAWAY100,
+	error_RUNAWAY500,
+  error_FLASH,
+}FatalErrors;
+
 
 // call before initializing any SPI devices
 void ST7735_Unselect();
@@ -282,5 +296,6 @@ void ucg_DrawRectangle(ucg_t* ucg, uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 uint8_t ucg_GetStrWidth(ucg_t *ucg, const tFont* font, const char *str);
 void ucg_InvertColors(bool invert);
 void ucg_DrawBmp(uint16_t x, uint16_t y, const tImage* img, uint16_t color, uint16_t bgcolor);
+void FatalError(uint8_t type);
 
 #endif // __ST7735_H__

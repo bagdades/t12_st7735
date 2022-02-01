@@ -18,20 +18,23 @@
 
 #include "set_temp_screen.h"
 #include "screen.h"
+#include "st7735.h"
 #include "widgets.h"
+#include "iron.h"
 #include <string.h>
 
 extern ucg_t ucg;
-uint16_t m_temp = 290;
+uint16_t m_temp;
+/* uint16_t m_temp = 290; */
 
 static void *getTemp() {
-  /* m_temp = getSetTemperature(); */
+  m_temp = getSetTemperature();
   return &m_temp;
 }
 
 void setTemp(uint16_t *value) {
   m_temp = *value;
-  /* setSetTemperature(m_temp); */
+  setSetTemperature(m_temp);
 }
 
 static int set_temp_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -45,15 +48,14 @@ static int tempProcessInput(widget_t *w, RE_Rotation_t r, RE_State_t *s) {
     return screen_main;
   switch (w->editable.selectable.state) {
   case widget_selected:
-    /* if(r == Click && getCurrentMode() != mode_set) */
-    /* 	setCurrentMode(mode_set); */
+    if(r == Click && getCurrentMode() != mode_set)
+    	setCurrentMode(mode_set);
     break;
   case widget_edit:
-    /* if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set)
-     * { */
-    /* 	setCurrentMode(mode_set); */
-    /* 	return -1; */
-    /* } */
+     if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set) { 
+    	setCurrentMode(mode_set);
+    	return -1;
+    }
     break;
   default:
     break;
@@ -62,8 +64,8 @@ static int tempProcessInput(widget_t *w, RE_Rotation_t r, RE_State_t *s) {
 }
 
 void set_temp_screen_setup(screen_t *scr) {
-	uint8_t hcenter = ucg_GetXDim(&ucg) / 2;
-	uint8_t swidth;
+	/* uint8_t hcenter = ucg_GetXDim(&ucg) / 2; */
+	/* uint8_t swidth; */
 	scr->draw = &default_screenDraw;
 	scr->processInput = &set_temp_processInput;
 	scr->init = &default_init;
@@ -73,9 +75,11 @@ void set_temp_screen_setup(screen_t *scr) {
 	char *s = "SET TEMP";
 	strcpy(widget->displayString, s);
 	widget->font = &font_18m;
-	swidth = ucg_GetStrWidth(&ucg, widget->font, s);
-	widget->posX = hcenter - (swidth  / 2);
+	/* swidth = ucg_GetStrWidth(&ucg, widget->font, s); */
+	widget->posX = 0;
 	widget->posY = 1;
+	widget->width = ucg_GetXDim(&ucg);
+	widget->displayWidget.textAlign = align_center;
 	widget->fcolor = C_YELLOW;
 	widget->reservedChars = 8;
 	widget->draw = default_widgetDraw;
@@ -91,7 +95,7 @@ void set_temp_screen_setup(screen_t *scr) {
 	widget->editable.inputData.number_of_dec = 0;
 	widget->editable.inputData.type = field_uinteger16;
 	widget->editable.big_step = 10;
-	widget->editable.step = 1;
+	widget->editable.step = 5;
 	widget->editable.selectable.tab = 1;
 	widget->editable.setData = (void (*)(void *)) & setTemp;
 	widget->reservedChars = 3;

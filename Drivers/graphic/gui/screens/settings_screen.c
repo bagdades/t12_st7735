@@ -11,6 +11,8 @@
 #include "st7735.h"
 #include "settings.h"
 #include "stm32f1xx_hal.h"
+#include "pid.h"
+#include "widgets.h"
 
 static widget_t *combo = NULL;
 static uint16_t KP = 0;
@@ -59,6 +61,7 @@ static void edit_iron_screen_init(screen_t *scr) {
 		addNewTipComboItem->enabled = 0;
 	}
 }
+
 static void *getTipStr() {
 	return str;
 }
@@ -66,6 +69,7 @@ static void *getTipStr() {
 static void setTipStr(char *s) {
 	strcpy(str, s);
 }
+
 static int saveTip(widget_t *w) {
 	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
 		strcpy(systemSettings.ironTips[systemSettings.currentNumberOfTips].name, str);
@@ -83,9 +87,11 @@ static int saveTip(widget_t *w) {
 	}
 	return screen_edit_iron_tips;
 }
+
 static int cancelTip(widget_t *w) {
 	return screen_edit_iron_tips;
 }
+
 static int delTip(widget_t *w) {
 	uint8_t itemIndex = 0;
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++ x) {
@@ -103,29 +109,34 @@ static int delTip(widget_t *w) {
 }
 ////
 static void * getMaxPower() {
-	/* MAX_POWER = currentPID.max * 100; */
+	MAX_POWER = currentPID.max * 100;
 	return &MAX_POWER;
 }
+
 static void setMaxPower(uint16_t *val) {
-	/* MAX_POWER = *val; */
-	/* currentPID.max = (double)MAX_POWER / 100.0; */
-	/* setupPIDFromStruct(); */
+	MAX_POWER = *val;
+	currentPID.max = (double)MAX_POWER / 100.0;
+	setupPIDFromStruct();
 }
+
 static int savePower(widget_t *w) {
-	/* systemSettings.ironTips[systemSettings.currentTip].PID.max = currentPID.max; */
-	/* saveSettings(); */
+	systemSettings.ironTips[systemSettings.currentTip].PID.max = currentPID.max;
+	saveSettings();
 	return screen_settings;
 
 }
+
 static int cancelPower(widget_t *w) {
-	/* currentPID.max = systemSettings.ironTips[systemSettings.currentTip].PID.max; */
-	/* setupPIDFromStruct(); */
+	currentPID.max = systemSettings.ironTips[systemSettings.currentTip].PID.max;
+	setupPIDFromStruct();
 	return screen_settings;
 }
+
 static void * getContrast_() {
 	/* CONTRAST = getContrast(); */
 	return &CONTRAST;
 }
+
 static void setContrast_(uint16_t *val) {
 	CONTRAST = *val;
 	/* setContrast(CONTRAST); */
@@ -139,7 +150,7 @@ static int cancelContrast(widget_t *w) {
 	/* setContrast(systemSettings.contrast); */
 	return screen_settings;
 }
-////
+
 static void * getBoostTime() {
 	BTIME = currentBoostSettings.time;
 	return &BTIME;
@@ -147,7 +158,7 @@ static void * getBoostTime() {
 static void setBoostTime(uint16_t *val) {
 	BTIME = *val;
 	currentBoostSettings.time = BTIME;
-	/* applyBoostSettings(); */
+	applyBoostSettings();
 }
 static void * getBoostTemp() {
 	BTEMP = currentBoostSettings.temperature;
@@ -157,25 +168,29 @@ static void setBoostTemp(uint16_t *val) {
 	BTEMP = *val;
 	currentBoostSettings.temperature = BTEMP;
 }
+
 static int saveBoost(widget_t *w) {
 	systemSettings.boost = currentBoostSettings;
 	saveSettings();
 	return screen_settings;
 }
+
 static int cancelBoost(widget_t *w) {
 	currentBoostSettings = systemSettings.boost;
 	return screen_settings;
 }
-////
+
 static int saveSleep(widget_t *w) {
 	systemSettings.sleep = currentSleepSettings;
 	saveSettings();
 	return screen_settings;
 }
+
 static int cancelSleep(widget_t *w) {
 	currentSleepSettings = systemSettings.sleep;
 	return screen_settings;
 }
+
 static void setSleepTime(uint16_t *val) {
 	SLEEPTIME = *val;
 	currentSleepSettings.sleepTime = SLEEPTIME;
@@ -185,60 +200,65 @@ static void * getSleepTime() {
 	SLEEPTIME = currentSleepSettings.sleepTime;
 	return &SLEEPTIME;
 }
+
 static void setStandByTime(uint16_t *val) {
 	STANDBYTIME = *val;
 	currentSleepSettings.standbyTime = STANDBYTIME;
 }
+
 static void * getStandByTime() {
 	STANDBYTIME = currentSleepSettings.standbyTime;
 	return &STANDBYTIME;
 }
+
 static void setSleepTemp(uint16_t *val) {
 	SLEEPTEMP = *val;
-	/* currentSleepSettings.sleepTemperature = SLEEPTEMP; */
+	currentSleepSettings.sleepTemperature = SLEEPTEMP;
 }
+
 static void * getSleepTemp() {
-	/* SLEEPTEMP = currentSleepSettings.sleepTemperature; */
+	SLEEPTEMP = currentSleepSettings.sleepTemperature;
 	return &SLEEPTEMP;
 }
-////
+
 static int savePID(widget_t *w) {
-	/* systemSettings.ironTips[systemSettings.currentTip].PID = currentPID; */
-	/* saveSettings(); */
+	systemSettings.ironTips[systemSettings.currentTip].PID = currentPID;
+	saveSettings();
 	return screen_settings;
 }
+
 static int cancelPID(widget_t *w) {
-	/* currentPID = systemSettings.ironTips[systemSettings.currentTip].PID; */
-	/* setupPIDFromStruct(); */
+	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
+	setupPIDFromStruct();
 	return screen_settings;
 }
 
 static void * getKp() {
-	/* KP = currentPID.Kp * 10000000; */
+	KP = currentPID.Kp * 10000000;
 	return &KP;
 }
 static void setKp(uint16_t *val) {
 	KP = *val;
-	/* currentPID.Kp = (double)KP / 10000000; */
-	/* setupPIDFromStruct(); */
+	currentPID.Kp = (double)KP / 10000000;
+	setupPIDFromStruct();
 }
 static void * getKi() {
-	/* KI = currentPID.Ki * 10000000; */
+	KI = currentPID.Ki * 10000000;
 	return &KI;
 }
 static void setKi(uint16_t *val) {
 	KI = *val;
-	/* currentPID.Ki = (double)KI / 10000000; */
-	/* setupPIDFromStruct(); */
+	currentPID.Ki = (double)KI / 10000000;
+	setupPIDFromStruct();
 }
 static void * getKd() {
-	/* KD = currentPID.Kd * 10000000; */
+	KD = currentPID.Kd * 10000000;
 	return &KD;
 }
 static void setKd(uint16_t *val) {
 	KD = *val;
-	/* currentPID.Kd = (double)KD / 10000000; */
-	/* setupPIDFromStruct(); */
+	currentPID.Kd = (double)KD / 10000000;
+	setupPIDFromStruct();
 }
 
 static void settings_screen_init(screen_t *scr) {
@@ -252,7 +272,7 @@ static void settings_screen_init(screen_t *scr) {
 void settings_screen_setup(screen_t *scr) {
 	///settings combobox
 	uint8_t hcenter = ucg_GetXDim(&ucg) / 2;
-	uint8_t swidth;
+	/* uint8_t swidth; */
 	scr->draw = &default_screenDraw;
 	scr->processInput = &default_screenProcessInput;
 	scr->init = &settings_screen_init;
@@ -262,9 +282,11 @@ void settings_screen_setup(screen_t *scr) {
 	char *s = "SETTINGS";
 	strcpy(widget->displayString, s);
 	widget->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, widget->font, s);
+	/* swidth = ucg_GetStrWidth(&ucg, widget->font, s); */
 	widget->posY = 0;
-	widget->posX = hcenter - (swidth  / 2);
+	widget->posX = 0;
+	widget->width = ucg_GetXDim(&ucg);
+	widget->displayWidget.textAlign = align_center;
 	widget->reservedChars = 8;
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_combo);
@@ -400,9 +422,11 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CONTRAST";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
-	w->posX = hcenter - (swidth  / 2);
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
+	w->posX = 0;
 	w->posY = 0;
+	w->width = ucg_GetXDim(&ucg);
+	w->displayWidget.textAlign = align_center;
 	w->reservedChars = 8;
 
 	w = screen_addWidget(sc);
@@ -411,15 +435,17 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	/* w->posX = 31; */
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg,w->font, s);
-	w->posX = hcenter - swidth;
+	/* swidth = ucg_GetStrWidth(&ucg,w->font, s); */
+	w->posX = 0;
 	w->posY = 20;
+	w->width = ucg_GetXDim(&ucg) / 2;
+	w->displayWidget.textAlign = align_right;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = hcenter + 2;
-	w->posY = 17;
+	w->posY = 20;
 	w->font = setFont;
 	w->editable.inputData.getData = &getContrast_;
 	w->editable.inputData.number_of_dec = 0;
@@ -464,9 +490,11 @@ void settings_screen_setup(screen_t *scr) {
 	s = "MAX POWER";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
-	w->posX = hcenter - (swidth  / 2);
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
+	w->posX = 0;
 	w->posY = 0;
+	w->width = ucg_GetXDim(&ucg);
+	w->displayWidget.textAlign = align_center;
 	w->reservedChars = 9;
 
 	w = screen_addWidget(sc);
@@ -474,9 +502,11 @@ void settings_screen_setup(screen_t *scr) {
 	s = "Value:";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
-	w->posX = hcenter - swidth;
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
+	w->posX = 0;
 	w->posY = 17;
+	w->width = ucg_GetXDim(&ucg) / 2;
+	w->displayWidget.textAlign = align_right;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
@@ -528,9 +558,11 @@ void settings_screen_setup(screen_t *scr) {
 	s = "BOOST";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
-	w->posX = hcenter - (swidth  / 2);
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
+	w->posX = 0;
 	w->posY = 0;
+	w->width = ucg_GetXDim(&ucg);
+	w->displayWidget.textAlign = align_center;
 	w->reservedChars = 1;
 
 	w = screen_addWidget(sc);
@@ -538,7 +570,7 @@ void settings_screen_setup(screen_t *scr) {
 	s = "Time(s):";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
 	w->posX = 1;
 	w->posY = 19;
 	w->reservedChars = 6;
@@ -548,7 +580,7 @@ void settings_screen_setup(screen_t *scr) {
 	s = "Temp(C):";
 	strcpy(w->displayString, s);
 	w->font = setFont;
-	swidth = ucg_GetStrWidth(&ucg, w->font, s);
+	/* swidth = ucg_GetStrWidth(&ucg, w->font, s); */
 	w->posX = 1;
 	w->posY = 38;
 	w->reservedChars = 6;

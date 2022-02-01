@@ -46,7 +46,8 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+// extern IWDG_HandleTypeDef hiwdg;
+extern CRC_HandleTypeDef hcrc;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -140,7 +141,8 @@ extern uint32_t max_allocated;
 #define ENC_R_Pin GPIO_PIN_4
 #define ENC_R_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define WAKE_input()		HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
+#define BUTTON_input()		HAL_GPIO_ReadPin(ENC_SW_GPIO_Port, ENC_SW_Pin)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

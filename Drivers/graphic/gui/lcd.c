@@ -104,5 +104,6 @@ void lcd_processInput(void) {
 void lcd_update(void) {
 	if(current_screen->update)
 		current_screen->update(current_screen);
+    /* HAL_IWDG_Refresh(&hiwdg);                     // Clear watchdog */
 	lcd_draw();
 }

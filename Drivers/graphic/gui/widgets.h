@@ -17,6 +17,7 @@
 // #include "ssd1306.h"
 // #include "ugui.h"
 
+typedef enum AlignType { align_disabled, align_left, align_center, align_right }AlignType;
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_bmp, field_string}widgetFieldType;
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button}widgetType;
@@ -54,6 +55,8 @@ typedef struct displayOnly_widget_t {
 	uint8_t	number_of_dec;
 	// void (*update)(widget_t*);
 	int32_t last_value;
+	AlignType textAlign;
+	uint8_t stringStart;
 } displayOnly_wiget_t;
 
 typedef struct editable_t {
@@ -102,6 +105,7 @@ struct widget_t
 	widget_t *next_widget;
 	uint8_t enabled;
 	widgetType type;
+	uint8_t width;
 	widgetRefreshType refresh;
 	uint16_t fcolor;
 	uint16_t bcolor;
@@ -130,5 +134,6 @@ int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
 comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen);
 void widgetDetectChange(widget_t* w, int32_t val);
+void widgetAlign(widget_t* w);
 
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */
