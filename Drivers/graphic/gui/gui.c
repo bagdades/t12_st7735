@@ -17,6 +17,7 @@
  */
 
 #include "gui.h"
+#include "calibration_screen.h"
 #include "lcd.h"
 #include "main_screen.h"
 #include "set_tip_screen.h"
@@ -40,6 +41,8 @@ void guiInit(void) {
 	set_temp_screen_setup(scr);
 	scr = lcd_addScreen(screen_set_tip);
 	set_tip_screen_setup(scr);
+	scr = lcd_addScreen(screen_edit_calibration_wait);
+	calibration_screen_setup(scr);
 	/* ucg.x_dim = ST7735_WIDTH; */
 	/* ucg.y_dim = ST7735_HEIGHT; */
 	/* ucg_Init(); */

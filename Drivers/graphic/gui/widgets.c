@@ -9,6 +9,7 @@
 #include "fonts.h"
 #include "screen.h"
 #include "st7735.h"
+#include <stdio.h>
 #include <string.h>
 
 extern ucg_t ucg;
@@ -209,6 +210,8 @@ void default_widgetUpdate(widget_t *widget) {
 				sprintf(widget->displayString,"%d", val_ui16);
 				widgetDetectChange(widget, val_ui16);
 				if(dis->number_of_dec) {
+					if(strlen(widget->displayString) < dis->number_of_dec)
+						sprintf(widget->displayString, "%03d", val_ui16);
 					insertDot(widget->displayString, dis->number_of_dec);
 				}
 				return;
@@ -335,7 +338,6 @@ void default_widgetDraw(widget_t *widget) {
 			} else {
 				ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString);
 			}
-			/* ucg_WriteString(&ucg, widget->posX, widget->posY, widget->displayString); */
 		}
 		if(draw_frame) {
 			uint16_t w = ucg_GetStrWidth(&ucg, (tFont*)widget->font, widget->displayString);
@@ -482,7 +484,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			uint16_t ui16;
 			char *str;
 			int8_t inc;
-			if(fabs(state->Diff) > 2) {
+			if(state->Diff > 2 || state->Diff < -2) {
 				inc = widget->editable.big_step;
 				if(state->Diff < 0)
 					inc = -1 * inc;

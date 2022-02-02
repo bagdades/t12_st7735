@@ -127,6 +127,8 @@ void main_screenUpdate(screen_t *scr) {
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	uint8_t r = input;
+	static uint32_t lastTime = 0;
+	uint32_t delayTime;
 	int ret =  1;
 	switch (r) {
 		case Click:
@@ -140,7 +142,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			ret = screen_set_tip;
 			return ret;
 	}
-	return default_screenProcessInput(scr, input, state);
+	delayTime = HAL_GetTick() - lastTime;
+	if((state->Diff > 2 || state->Diff < -2) && delayTime > 1000) {
+		lastTime = HAL_GetTick();
+		return default_screenProcessInput(scr, input, state);
+	}
+	else 
+		return -1;
 }
 
 void main_screen_setup(screen_t *scr) {

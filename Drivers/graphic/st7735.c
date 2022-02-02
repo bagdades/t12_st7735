@@ -295,6 +295,11 @@ void ucg_WriteString(ucg_t* ucg, uint16_t x, uint16_t y, const char* str) {
     uint8_t chr;
 
     while(*str) {
+        if(*str == '\n' || *str == '\r'){
+            y = y + ucg->font->chars[0].image->height + 2;
+            x = 0;
+            str++;
+        }
         chr = *str - ucg->font->chars[0].code;
         if(x + ucg->font->chars[chr].image->width >= ST7735_WIDTH) {
             x = 0;

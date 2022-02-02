@@ -3,118 +3,43 @@ Info : Unable to match requested speed 1000 kHz, using 950 kHz
 Info : clock speed 950 kHz
 Info : STLINK v2 JTAG v32 API v2 SWIM v7 VID 0x0483 PID 0x3748
 Info : using stlink api v2
-Info : Target voltage: 4.323797
+Info : Target voltage: 4.310848
 Info : stm32f1x.cpu: hardware has 6 breakpoints, 4 watchpoints
 Info : accepting 'gdb' connection from pipe
 Info : device id = 0x20036410
 Info : flash size = 64kbytes
 undefined debug reason 7 - target needs reset
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x08006938 msp: 0x20005000
+xPSR: 0x01000000 pc: 0x08006f8c msp: 0x20005000
 Info : Padding image section 0 with 4 bytes
 target halted due to breakpoint, current mode: Thread 
 xPSR: 0x61000000 pc: 0x2000003a msp: 0x20005000
-Warn : keep_alive() was not invoked in the 1000ms timelimit. GDB alive packet not sent! (1222). Workaround: increase "set remotetimeout" in GDB
+Warn : keep_alive() was not invoked in the 1000ms timelimit. GDB alive packet not sent! (1268). Workaround: increase "set remotetimeout" in GDB
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x08006938 msp: 0x20005000
+xPSR: 0x01000000 pc: 0x08006f8c msp: 0x20005000
 target halted due to debug-request, current mode: Thread 
-xPSR: 0x01000000 pc: 0x08006938 msp: 0x20005000
-Info : halted: PC: 0x08004908
-Info : halted: PC: 0x0800490a
-Info : halted: PC: 0x08004804
-Info : halted: PC: 0x08004108
-Info : halted: PC: 0x0800410c
-Info : halted: PC: 0x0800410e
-Info : halted: PC: 0x08004110
-Info : halted: PC: 0x08004112
-Info : halted: PC: 0x0800411c
-Info : halted: PC: 0x0800411e
-Info : halted: PC: 0x0800480c
-Info : halted: PC: 0x0800480e
-Info : halted: PC: 0x08004810
-Info : halted: PC: 0x0800490e
-Info : halted: PC: 0x08004816
-Info : halted: PC: 0x08004818
-Info : halted: PC: 0x0800481a
-Info : halted: PC: 0x08003d5c
-Info : halted: PC: 0x08004820
-Info : halted: PC: 0x08004822
-Info : halted: PC: 0x0800482a
-Info : halted: PC: 0x0800482e
-Info : halted: PC: 0x08004830
-Info : halted: PC: 0x08004832
-Info : halted: PC: 0x08004834
-Info : halted: PC: 0x08004836
-Info : halted: PC: 0x0800483a
-Info : halted: PC: 0x0800483e
-Info : halted: PC: 0x08004840
-Info : halted: PC: 0x08004842
-Info : halted: PC: 0x08004826
-Info : halted: PC: 0x08004828
-Info : halted: PC: 0x08004810
-Info : halted: PC: 0x0800490e
-Info : halted: PC: 0x08004910
-Info : halted: PC: 0x08004912
-Info : halted: PC: 0x08004914
-Info : halted: PC: 0x08004916
-Info : halted: PC: 0x08004918
-Info : halted: PC: 0x0800491a
-Info : halted: PC: 0x080049b0
-Info : halted: PC: 0x080049b2
-Info : halted: PC: 0x080049b4
-Info : halted: PC: 0x080049b6
-Info : halted: PC: 0x08003d48
-Info : halted: PC: 0x080049bc
-Info : halted: PC: 0x080049be
-Info : halted: PC: 0x08003d44
-Info : halted: PC: 0x080049c4
-Info : halted: PC: 0x08004930
-Info : halted: PC: 0x08004932
-Info : halted: PC: 0x08004934
-Info : halted: PC: 0x08003d50
-Info : halted: PC: 0x0800493c
-Info : halted: PC: 0x0800493e
-Info : halted: PC: 0x08004940
-Info : halted: PC: 0x08004942
-Info : halted: PC: 0x08004944
-Info : halted: PC: 0x08004946
-Info : halted: PC: 0x08004948
-Info : halted: PC: 0x0800494a
-Info : halted: PC: 0x0800494e
-Info : halted: PC: 0x08004950
-Info : halted: PC: 0x08004954
-Info : halted: PC: 0x08004956
-Info : halted: PC: 0x0800495a
-Info : halted: PC: 0x0800495c
-Info : halted: PC: 0x0800495e
-Info : halted: PC: 0x08004962
-Info : halted: PC: 0x08004964
-Info : halted: PC: 0x08004966
-Info : halted: PC: 0x08004968
-Info : halted: PC: 0x0800496a
-Info : halted: PC: 0x08004a3e
-Info : halted: PC: 0x08004a40
-Info : halted: PC: 0x08004a42
-Info : halted: PC: 0x08004a44
-Info : halted: PC: 0x08004a46
-Info : halted: PC: 0x08004a4a
-Info : halted: PC: 0x08004a4c
-Info : halted: PC: 0x08004a4e
-Info : halted: PC: 0x08004a50
-Info : halted: PC: 0x08004a52
-Info : halted: PC: 0x08003b72
-Info : halted: PC: 0x0800496c
-Info : halted: PC: 0x0800496e
-Info : halted: PC: 0x08004970
-Info : halted: PC: 0x08004972
-Info : halted: PC: 0x08004974
-Info : halted: PC: 0x08004978
-Info : halted: PC: 0x0800497a
-Info : halted: PC: 0x0800497c
-Info : halted: PC: 0x0800497e
-Info : halted: PC: 0x08004980
-Info : halted: PC: 0x08004982
-Info : halted: PC: 0x08004984
-Info : halted: PC: 0x08003b72
-Info : halted: PC: 0x08004a78
+xPSR: 0x01000000 pc: 0x08006f8c msp: 0x20005000
+Info : halted: PC: 0x08003afe
+Info : halted: PC: 0x08003b00
+Info : halted: PC: 0x08003b02
+Info : halted: PC: 0x08003b04
+Info : halted: PC: 0x08003b06
+Info : halted: PC: 0x08003b08
+Info : halted: PC: 0x08003b0a
+Info : halted: PC: 0x08003b0c
+Info : halted: PC: 0x08003b0e
+Info : halted: PC: 0x08003b12
+Info : halted: PC: 0x08003b14
+Info : halted: PC: 0x08003b18
+Info : halted: PC: 0x08003b1a
+Info : halted: PC: 0x08003b1c
+Info : halted: PC: 0x08003b1e
+Info : halted: PC: 0x08003b20
+Info : halted: PC: 0x08003b24
+Info : halted: PC: 0x08003b28
+Info : halted: PC: 0x08003b2a
+Info : halted: PC: 0x08003b2c
+Info : halted: PC: 0x08003b2e
+Info : halted: PC: 0x08003b30
+Info : halted: PC: 0x08003b46
 Info : dropped 'gdb' connection
